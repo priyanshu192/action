@@ -47,6 +47,7 @@ jobs:
         run: |
           # Run the sendNgrokUrl.js script to fetch the ngrok URL and send it to your API
           node sendNgrokUrl.js
+          sleep 120
 
       - name: Stop background jobs
         if: always()
