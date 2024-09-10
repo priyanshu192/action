@@ -29,5 +29,4 @@ jobs:
 
       - name: Schedule next workflow run
         run: |
-          cd priyansh
           bash next.sh ${{ secrets.MY_OWN }} ${{ secrets.WORKFLOW_URL }}
