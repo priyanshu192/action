@@ -1,0 +1,72 @@
+name: Run chatbot with ngrok
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the public repo
+      - name: Checkout public repo
+        uses: actions/checkout@v3
+
+      # Checkout private repo containing the bot code
+      - name: Checkout private repo (containing the bot code)
+        uses: actions/checkout@v3
+        with:
+          repository: priyanshu192/Priyansh-my
+          token: ${{ secrets.MY_OWN }}
+          path: private-repo
+
+      # Install chatbot dependencies from the private repo
+      - name: Install dependencies
+        run: |
+          cd private-repo
+          npm install
+
+      # Start chatbot and ngrok simultaneously
+      - name: Start chatbot and ngrok
+        run: |
+          # Start the chatbot in the background
+          cd private-repo
+          npm start &
+
+          # Install ngrok
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && \
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list && \
+          sudo apt-get update && sudo apt-get install ngrok
+
+          # Authenticate ngrok with the authtoken
+          ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+          # Start ngrok in the background (replace 3000 with your chatbot's port)
+          ngrok http 3000 > /dev/null &
+
+          # Wait a few seconds to let ngrok initialize
+          sleep 5
+
+          # Fetch and log the ngrok public URL
+          NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+          echo "Public URL for chatbot: $NGROK_URL"
+
+          # Export the URL to the environment for use in later steps
+          echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
+
+      # Use the ngrok URL in another step (if required)
+      - name: Use ngrok URL in another step
+        run: |
+          echo "The chatbot is publicly accessible at: ${{ env.NGROK_URL }}"
+
+      # (Optional) Send ngrok URL to an external API
+      - name: Send ngrok URL to external API
+        run: |
+          curl -X POST https://your-api-endpoint.com/update-url \
+          -H "Content-Type: application/json" \
+          -d '{"ngrokUrl": "${{ env.NGROK_URL }}"}'
+          sleep 120
+
