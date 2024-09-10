@@ -29,4 +29,4 @@ jobs:
 
       - name: Run the schedule script
         run: |
-          bash priyansh/schedule_next_run.sh "${{ secrets.MY_OWN }}" "${{ github.repository }}"
+          bash priyansh/next.sh "${{ secrets.MY_OWN }}" "${{ github.repository }}"
