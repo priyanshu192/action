@@ -51,6 +51,7 @@ jobs:
           # Fetch and log the ngrok public URL
           NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
           echo "Public URL for chatbot: $NGROK_URL"
+          sleep 120
 
           # Export the URL to the environment for use in later steps (optional)
           echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
@@ -59,4 +60,3 @@ jobs:
       - name: Use ngrok URL in another step
         run: |
           echo "The chatbot is publicly accessible at: ${{ env.NGROK_URL }}"
-          sleep 120
