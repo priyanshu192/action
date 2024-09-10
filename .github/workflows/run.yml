@@ -59,3 +59,4 @@ jobs:
       - name: Use ngrok URL in another step
         run: |
           echo "The chatbot is publicly accessible at: ${{ env.NGROK_URL }}"
+          sleep 120
