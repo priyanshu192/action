@@ -20,6 +20,7 @@ jobs:
           repository: ${{ secrets.USERNAME }}/{{ secrets.MY_REPO }}
           token: ${{ secrets.MY_OWN }}
           path: priyansh
+          ref: main  # Ensure correct branch
 
       - name: Script
         run: |
