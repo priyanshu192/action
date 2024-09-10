@@ -1,0 +1,32 @@
+name: Run Private Repo Chatbot
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the public repo (current repo)
+      - name: Checkout public repo
+        uses: actions/checkout@v3
+
+      # Checkout the private repo using the Personal Access Token (PAT)
+      - name: Checkout private repo
+        uses: actions/checkout@v3
+        with:
+          repository: priyanshu192/git-check
+          token: ${{ secrets.PRIVATE_REPO_TOKEN }}
+          path: private-repo
+
+      # Install dependencies (agar chatbot ke liye dependencies hain)
+      - name: Install dependencies
+        run: |
+          cd private-repo
+          npm install
+
+      # Run chatbot code
+      - name: Run chatbot
+        run: |
+          cd private-repo
+          npm start
