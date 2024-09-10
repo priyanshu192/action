@@ -5,17 +5,17 @@ on:
     branches:
       - main
   workflow_dispatch:
-  schedule:
-    - cron: '*/1 * * * *'  # Run every 2 minutes
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the public repo
       - name: Checkout public repo
         uses: actions/checkout@v3
 
+      # Checkout private repo (containing the bot code)
       - name: Checkout private repo (containing the bot code)
         uses: actions/checkout@v3
         with:
@@ -23,12 +23,14 @@ jobs:
           token: ${{ secrets.MY_OWN }}
           path: private-repo
 
+      # Install chatbot dependencies from the private repo
       - name: Install dependencies
         run: |
           cd private-repo
           npm install
 
-      - name: Start chatbot, ngrok and download file
+      # Start chatbot and ngrok simultaneously and send the ngrok URL to an external API
+      - name: Start chatbot and ngrok
         run: |
           # Start the chatbot in the background
           cd private-repo
@@ -52,21 +54,16 @@ jobs:
           NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
           echo "Public URL for chatbot: $NGROK_URL"
 
-          # Export the URL to the environment for use in later steps
+          # Send the ngrok URL to an external API
+          curl -X POST https://39343eaf-3ef0-4bce-9d26-caa730c7e7f8-00-2grgov8crrtd2.kirk.replit.dev/ngrok-url \
+            -H "Content-Type: application/json" \
+            -d '{"ngrokUrl": "'"$NGROK_URL"'"}'
+            sleep 600
+
+          # Export the URL to the environment for use in later steps (optional)
           echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
 
-          # Attempt to download the SQLite file (may require manual steps)
-          curl -o private-repo/includes/data.sqlite "http://$NGROK_URL/sqlite?apikey=pubghate"
-          
-          # Commit and push the file to the repo
-          cd private-repo
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add includes/data.sqlite
-          git commit -m "Update data.sqlite file"
-          git push origin main
-          sleep 180
-
+      # Optionally: Use the ngrok URL in another step
       - name: Use ngrok URL in another step
         run: |
           echo "The chatbot is publicly accessible at: ${{ env.NGROK_URL }}"
