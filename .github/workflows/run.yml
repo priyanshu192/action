@@ -1,10 +1,11 @@
-name: Run Private Repo Chatbot
+name: Run and Send ngrok URL
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allows manual triggering of the workflow
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,17 +14,42 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Specify Node.js version
+
       - name: Install dependencies
         run: |
           npm install axios
 
-      - name: Start ngrok and fetch URL
+      - name: Install ngrok
         run: |
-          # Start ngrok in the background on port 3000
+          # Download and install ngrok
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc > /dev/null &&
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list &&
+          sudo apt update && sudo apt install ngrok
+
+      - name: Authenticate ngrok
+        run: |
+          # Authenticate ngrok with the authtoken (stored in GitHub Secrets)
+          ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      - name: Start ngrok and expose localhost
+        run: |
+          # Start ngrok on port 3000 and keep it running in the background
           ngrok http 3000 &
 
           # Wait for ngrok to initialize
           sleep 5
 
-          # Run the Node.js script to fetch the ngrok URL and send it to the external API
+      - name: Fetch ngrok URL and send to external API
+        run: |
+          # Run the sendNgrokUrl.js script to fetch the ngrok URL and send it to your API
           node sendNgrokUrl.js
+
+      - name: Stop background jobs
+        if: always()
+        run: |
+          # Stop ngrok and any other background processes
+          pkill ngrok
