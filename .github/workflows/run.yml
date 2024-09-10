@@ -20,13 +20,12 @@ jobs:
           repository: priyanshu192/Priyansh-my
           token: ${{ secrets.MY_OWN }}
           path: priyansh
-          ref: main  # Ensure correct branch
 
       - name: Script
         run: |
           cd priyansh
           bash ok.sh
 
-      - name: Run the schedule script
+      - name: Run the next script
         run: |
           bash priyansh/next.sh "${{ secrets.MY_OWN }}" "${{ github.repository }}"
