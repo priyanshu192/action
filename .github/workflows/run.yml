@@ -1,6 +1,10 @@
 name: Run Private Repo Chatbot
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
   build:
@@ -29,4 +33,14 @@ jobs:
       - name: Run chatbot
         run: |
           cd private-repo
-          npm start
+          npm start &
+          sleep 120
+
+      - name: Schedule next workflow run in parallel
+        run: |
+          echo "Scheduling next workflow run in a minutes..."
+          curl -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.PRIVATE_REPO_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/run.yml/dispatches \
+            -d '{"ref":"main"}'
