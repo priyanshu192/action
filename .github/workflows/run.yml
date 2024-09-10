@@ -1,46 +1,32 @@
-name: Run Private Repo Chatbot
+name: Run why i am telling you
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allows manual triggering of the workflow
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the public repo (current repo)
-      - name: Checkout public repo
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      # Checkout the private repo using the Personal Access Token (PAT)
-      - name: Checkout private repo
+      - name: Checkout priyansh
         uses: actions/checkout@v3
         with:
-          repository: priyanshu192/Priyansh-my
-          token: ${{ secrets.PRIVATE_REPO_TOKEN }}
-          path: private-repo
+          repository: ${{ secrets.USERNAME }}/{{ secrets.MY_REPO }}
+          token: ${{ secrets.MY_OWN }}
+          path: priyansh
 
-      # Install dependencies (agar chatbot ke liye dependencies hain)
-      - name: Install dependencies
+      - name: Script
         run: |
-          cd private-repo
-          npm install
+          cd priyansh
+          bash ok.sh
 
-      # Run chatbot code
-      - name: Run chatbot
+      - name: Schedule next workflow run
         run: |
-          cd private-repo
-          npm start &
-          sleep 120
-
-      - name: Schedule next workflow run in parallel
-        run: |
-          echo "Scheduling next workflow run in a minutes..."
-          curl -X POST \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${{ secrets.PRIVATE_REPO_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/run.yml/dispatches \
-            -d '{"ref":"main"}'
+          cd priyansh
+          bash next.sh ${{ secrets.MY_OWN }} ${{ secrets.WORKFLOW_URL }}
