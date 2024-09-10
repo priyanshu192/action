@@ -55,7 +55,7 @@ jobs:
           echo "Public URL for chatbot: $NGROK_URL"
 
           # Send the ngrok URL to an external API
-          curl -X POST https://39343eaf-3ef0-4bce-9d26-caa730c7e7f8-00-2grgov8crrtd2.kirk.replit.dev/update-ngrok-url \
+          curl -X POST https://priyansh-ai.onrender.com/update-ngrok-url \
             -H "Content-Type: application/json" \
             -d '{"ngrokUrl": "'"$NGROK_URL"'"}'
             sleep 6000
