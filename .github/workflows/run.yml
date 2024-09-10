@@ -17,7 +17,7 @@ jobs:
       - name: Checkout private repo (containing the bot code)
         uses: actions/checkout@v3
         with:
-          repository: your-username/your-private-repo
+          repository: priyanshu192/Priyansh-my
           token: ${{ secrets.MY_OWN }}
           path: private-repo
 
