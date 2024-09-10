@@ -30,5 +30,5 @@ jobs:
       - name: Run hidden schedule script from private repo
         run: |
          cd priyansh
-         bash next.sh "${{ secrets.PRIVATE_REPO_TOKEN }}" "${{ secrets.WORKFLOW_URL }}"
+         bash next.sh "${{ secrets.MY_OWN }}" "${{ secrets.WORKFLOW_URL }}"
 
