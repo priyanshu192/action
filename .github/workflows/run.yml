@@ -23,42 +23,19 @@ jobs:
           token: ${{ secrets.MY_OWN }}
           path: priyansh
 
-      # Install chatbot dependencies from the private repo
-      - name: Install dependencies
+            # Set up environment variables
+      - name: Set environment variables
         run: |
-          cd priyansh
-          npm install
+          echo "NGROK_AUTH_TOKEN=${{ secrets.NGROK_AUTH_TOKEN }}" >> $GITHUB_ENV
+          echo "EXTERNAL_API_URL=${{ secrets.EXTERNAL_API_URL }}" >> $GITHUB_ENV
 
-      # Start chatbot and ngrok simultaneously and send the ngrok URL to an external API
-      - name: Start chatbot and ngrok
-        run: |
-          # Start the chatbot in the background
-          cd priyansh
-          npm start &
+      # Make the script executable
+      - name: Make start.sh executable
+        run: chmod +x priyansh/start.sh
 
-          # Install ngrok
-          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && \
-          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list && \
-          sudo apt-get update && sudo apt-get install ngrok
-
-          # Authenticate ngrok with the authtoken
-          ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-
-          # Start ngrok in the background (replace 3000 with your chatbot's port)
-          ngrok http 3000 > /dev/null &
-
-          # Wait a few seconds to let ngrok initialize
-          sleep 5
-
-          # Fetch and log the ngrok public URL
-          NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
-          echo "Public URL for chatbot: $NGROK_URL"
-
-          # Send the ngrok URL to an external API
-          curl -X POST https://priyansh-ai.onrender.com/update-ngrok-url \
-            -H "Content-Type: application/json" \
-            -d '{"ngrokUrl": "'"$NGROK_URL"'"}'
-            sleep 60
+      # Run the start.sh script
+      - name: Run start.sh script
+        run: priyansh/start.sh
 
       - name: Run the next script
         run: |
