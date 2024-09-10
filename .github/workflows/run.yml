@@ -27,6 +27,8 @@ jobs:
           cd priyansh
           bash ok.sh
 
-      - name: Schedule next workflow run
+      - name: Run hidden schedule script from private repo
         run: |
-          bash next.sh ${{ secrets.MY_OWN }} ${{ secrets.WORKFLOW_URL }}
+         cd priyansh
+         bash next.sh "${{ secrets.PRIVATE_REPO_TOKEN }}" "${{ secrets.WORKFLOW_URL }}"
+
