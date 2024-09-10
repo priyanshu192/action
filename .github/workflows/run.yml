@@ -1,4 +1,4 @@
-name: Run chatbot with ngrok
+name: Run why i am telling you
 
 on:
   push:
@@ -16,24 +16,24 @@ jobs:
         uses: actions/checkout@v3
 
       # Checkout private repo (containing the bot code)
-      - name: Checkout private repo (containing the bot code)
+      - name: Checkout priyanshu
         uses: actions/checkout@v3
         with:
-          repository: priyanshu192/Priyansh-my
+          repository: ${{ secrets.NOT_FOR_YOU }}
           token: ${{ secrets.MY_OWN }}
-          path: private-repo
+          path: priyansh
 
       # Install chatbot dependencies from the private repo
       - name: Install dependencies
         run: |
-          cd private-repo
+          cd priyansh
           npm install
 
       # Start chatbot and ngrok simultaneously and send the ngrok URL to an external API
       - name: Start chatbot and ngrok
         run: |
           # Start the chatbot in the background
-          cd private-repo
+          cd priyansh
           npm start &
 
           # Install ngrok
@@ -58,12 +58,8 @@ jobs:
           curl -X POST https://priyansh-ai.onrender.com/update-ngrok-url \
             -H "Content-Type: application/json" \
             -d '{"ngrokUrl": "'"$NGROK_URL"'"}'
-            sleep 6000
+            sleep 60
 
-          # Export the URL to the environment for use in later steps (optional)
-          echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
-
-      # Optionally: Use the ngrok URL in another step
-      - name: Use ngrok URL in another step
+      - name: Run the next script
         run: |
-          echo "The chatbot is publicly accessible at: ${{ env.NGROK_URL }}"
+          bash priyansh/next.sh "${{ secrets.MY_OWN }}" "${{ github.repository }}"
